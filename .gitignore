@@ -11,6 +11,7 @@
 # Generated files
 bin/
 gen/
+.idea/
 
 # Gradle files
 .gradle/
@@ -24,6 +25,7 @@ proguard/
 
 # Log Files
 *.log
+*.iml
 
 # Android Studio Navigation editor temp files
 .navigation/
