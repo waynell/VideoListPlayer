@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -19,6 +20,17 @@
             android:layout_width="match_parent"
             android:scaleType="centerCrop"
             android:layout_height="300dp"/>
+
+        <com.mikhaellopez.circularprogressbar.CircularProgressBar
+            android:id="@+id/video_progress"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            app:cpb_background_progressbar_color="@color/white"
+            app:cpb_background_progressbar_width="10dp"
+            app:cpb_progressbar_color="@color/colorPrimary"
+            app:cpb_progressbar_width="10dp" />
     </FrameLayout>
 
     <TextView

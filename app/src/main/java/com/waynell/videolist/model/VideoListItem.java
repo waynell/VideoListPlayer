@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.volokh.danylo.visibility_utils.items.ListItem;
+import com.waynell.videolist.VideoViewHolder;
 
 /**
  * @author Wayne
@@ -18,44 +19,47 @@ public class VideoListItem implements ListItem {
     private int mState = STATE_IDLE;
 
     private int mPosition;
-    private String mHttpUrl;
-    private String mFilePath;
+    private String mCoverUrl;
+    private String mVideoUrl;
+    private String mVideoPath;
     private VideoViewHolder mViewHolder;
     private final Rect mCurrentViewRect = new Rect();
 
-    public VideoListItem(String url) {
-        mHttpUrl = url;
+    public VideoListItem(String videoUrl, String coverUrl) {
+        mCoverUrl = coverUrl;
+        mVideoUrl = videoUrl;
     }
 
-    public void setPosition(int position) {
-        mPosition = position;
+    public String getCoverUrl() {
+        return mCoverUrl;
     }
 
     public int getPosition() {
         return mPosition;
     }
 
-    public void setViewHolder(VideoViewHolder viewHolder) {
+    public void bindViewHolder(int position, VideoViewHolder viewHolder) {
+        mPosition = position;
         mViewHolder = viewHolder;
     }
 
-    public void setFilePath(String filePath) {
-        Log.e("VideoListItem", "setFilePath " + filePath + " pos " + mPosition);
-        mFilePath = filePath;
-        if(filePath != null) {
+    public void setVideoPath(String videoPath) {
+        Log.e("VideoListItem", "setVideoPath " + videoPath + " pos " + mPosition);
+        mVideoPath = videoPath;
+        if(videoPath != null) {
             if (mState == STATE_ACTIVED) {
-                mViewHolder.videoView.setVideoPath(filePath);
+                mViewHolder.videoView.setVideoPath(videoPath);
                 mViewHolder.videoView.start();
             }
         }
     }
 
-    public String getFilePath() {
-        return mFilePath;
+    public String getVideoPath() {
+        return mVideoPath;
     }
 
-    public String getHttpUrl() {
-        return mHttpUrl;
+    public String getVideoUrl() {
+        return mVideoUrl;
     }
 
     private boolean viewIsPartiallyHiddenBottom(int height) {
@@ -86,10 +90,10 @@ public class VideoListItem implements ListItem {
 
     @Override
     public void setActive(View currentView, int newActiveViewPosition) {
-        Log.e("VideoListItem", "setActive " + newActiveViewPosition + " path " + mFilePath);
+        Log.e("VideoListItem", "setActive " + newActiveViewPosition + " path " + mVideoPath);
         mState = STATE_ACTIVED;
-        if (mFilePath != null) {
-            mViewHolder.videoView.setVideoPath(mFilePath);
+        if (mVideoPath != null) {
+            mViewHolder.videoView.setVideoPath(mVideoPath);
             mViewHolder.videoView.start();
         }
     }
@@ -99,5 +103,7 @@ public class VideoListItem implements ListItem {
         Log.e("VideoListItem", "deactivate " + position);
         mState = STATE_DEACTIVED;
         mViewHolder.videoView.stop();
+        mViewHolder.videoCover.setVisibility(View.VISIBLE);
+        mViewHolder.videoCover.setAlpha(1.f);
     }
 }

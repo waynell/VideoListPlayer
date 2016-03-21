@@ -1,12 +1,15 @@
-package com.waynell.videolist;
+package com.waynell.videolist.target;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
@@ -19,28 +22,38 @@ import java.io.File;
 /**
  * @author Wayne
  */
-public class VideoViewTarget extends ViewTarget<TextureVideoView, File> implements TextureVideoView.Callback {
+public class VideoLoadTarget extends ViewTarget<TextureVideoView, File> implements TextureVideoView.Callback {
 
     private VideoListItem mItem;
-    private ImageView mImageView;
+    private final ImageView mCoverView;
 
-    public VideoViewTarget(TextureVideoView view, ImageView cover, VideoListItem item) {
-        super(view);
-        view.setCallback(this);
+    public VideoLoadTarget(TextureVideoView videoView, ImageView coverView) {
+        super(videoView);
+        mCoverView = coverView;
+    }
+
+    public void bind(VideoListItem item) {
         mItem = item;
-        mImageView = cover;
-        if (mImageView.animate() != null) {
-            Log.e("VideoViewTarget", "onConstructor cancel animate");
-            mImageView.animate().cancel();
+        if (mCoverView.animate() != null) {
+            mCoverView.animate().cancel();
         }
-        mImageView.setVisibility(View.VISIBLE);
-        mImageView.setAlpha(1.f);
+        mCoverView.setVisibility(View.VISIBLE);
+        mCoverView.setAlpha(1.f);
+
+        Glide.with(mCoverView.getContext())
+                .load(item.getCoverUrl())
+                .placeholder(new ColorDrawable(0xDDDDDD))
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .into(mCoverView);
+
+        view.setCallback(this);
+        view.stop();
     }
 
     @Override
     public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
         Log.i("VideoViewTarget", "onResourceReady " + mItem.getPosition() + " path " + resource.getAbsolutePath());
-        mItem.setFilePath(resource.getAbsolutePath());
+        mItem.setVideoPath(resource.getAbsolutePath());
     }
 
     @Override
@@ -48,15 +61,13 @@ public class VideoViewTarget extends ViewTarget<TextureVideoView, File> implemen
         cb.onSizeReady(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
     }
 
-
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        if (mImageView.animate() != null) {
-            Log.i("VideoViewTarget", "onError cancel animate");
-            mImageView.animate().cancel();
+        if (mCoverView.animate() != null) {
+            mCoverView.animate().cancel();
         }
-        mImageView.setAlpha(1.f);
-        mImageView.setVisibility(View.VISIBLE);
+        mCoverView.setAlpha(1.f);
+        mCoverView.setVisibility(View.VISIBLE);
         return true;
     }
 
@@ -83,16 +94,16 @@ public class VideoViewTarget extends ViewTarget<TextureVideoView, File> implemen
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-            Log.i("VideoViewTarget", "onInfo MEDIA_INFO_VIDEO_RENDERING_START");
-            mImageView.animate()
+            mCoverView.animate()
                     .alpha(0)
                     .setDuration(500)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            mImageView.setVisibility(View.GONE);
+                            mCoverView.setVisibility(View.INVISIBLE);
                         }
                     });
+            return true;
         }
         return false;
     }

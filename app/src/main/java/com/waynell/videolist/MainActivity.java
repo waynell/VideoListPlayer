@@ -8,19 +8,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.stream.HttpUrlGlideUrlLoader;
 import com.volokh.danylo.visibility_utils.calculator.DefaultSingleItemCalculatorCallback;
 import com.volokh.danylo.visibility_utils.calculator.SingleListViewItemActiveCalculator;
 import com.volokh.danylo.visibility_utils.scroll.ItemsPositionGetter;
 import com.volokh.danylo.visibility_utils.scroll.RecyclerViewItemPositionGetter;
 import com.waynell.videolist.model.VideoListItem;
-import com.waynell.videolist.model.VideoViewHolder;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,21 +34,18 @@ public class MainActivity extends AppCompatActivity {
     private SingleListViewItemActiveCalculator mCalculator = new SingleListViewItemActiveCalculator(new
             DefaultSingleItemCalculatorCallback(), mListItems);
 
-    private static final String url = "http://vweixinf.tc.qq" +
-            ".com/snsvideodownload?filekey" +
-            "=30270201010420301e0201660402535a0410165c8aa30524d1de81b162c8576b880b020306fe010400&bizid=1023&hy=SZ" +
-            "&fileparam=302c0201010425302302040df93e0b020456dd610f02024eea02031e903a02032dc6c00204bdda370a0201000400" +
-            "%20200%20GET%20vweixinf.tc.qq" +
-            ".com%20/snsvideodownload?filekey" +
-            "=30270201010420301e0201660402535a0410165c8aa30524d1de81b162c8576b880b020306fe010400&bizid=1023&hy=SZ" +
-            "&fileparam=302c0201010425302302040df93e0b020456dd610f02024eea02031e903a02032dc6c00204bdda370a0201000400" +
-            "%20Tue%20Mar%2008%2017:40:09%20CST%202016%20130%20459147%20Complete";
+    private static final String url = "http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_1mb.mp4";
 
-    private static final String url2 = "http://10.33.91.71/test/v/20160316/7020434498005237761803316592_s.mp4";
+    private static final String url2 = "http://techslides.com/demos/sample-videos/small.mp4";
 
-    private static final String url3 = "http://10.33.91.71/test/v/20160316/6542116569848217601803281574_s.mp4";
+    private static final String url3 = "http://download.wavetlan.com/SVV/Media/HTTP/H264/Other_Media/H264_test7_voiceclip_mp4_480x360.mp4";
 
-    private static final String url4 = "http://10.33.91.71/test/v/20160316/6542116569848217601803363274_s.mp4";
+    private static final String url4 = "http://download.wavetlan.com/SVV/Media/HTTP/MP4/ConvertedFiles/Media-Convert/Unsupported/test7.mp4";
+
+    private static final String purl1 = "http://img10.3lian.com/sc6/show02/67/27/03.jpg";
+    private static final String purl2 = "http://img10.3lian.com/sc6/show02/67/27/04.jpg";
+    private static final String purl3 = "http://img10.3lian.com/sc6/show02/67/27/01.jpg";
+    private static final String purl4 = "http://img10.3lian.com/sc6/show02/67/27/02.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +53,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mListItems.add(new VideoListItem(url));
-        mListItems.add(new VideoListItem(url2));
-        mListItems.add(new VideoListItem(url3));
-        mListItems.add(new VideoListItem(url4));
-        mListItems.add(new VideoListItem(url));
-        mListItems.add(new VideoListItem(url2));
-        mListItems.add(new VideoListItem(url3));
-        mListItems.add(new VideoListItem(url4));
-        mListItems.add(new VideoListItem(url));
-        mListItems.add(new VideoListItem(url2));
-        mListItems.add(new VideoListItem(url3));
-        mListItems.add(new VideoListItem(url4));
-        mListItems.add(new VideoListItem(url));
-        mListItems.add(new VideoListItem(url2));
-        mListItems.add(new VideoListItem(url3));
-        mListItems.add(new VideoListItem(url4));
+        mListItems.add(new VideoListItem(url, purl1));
+        mListItems.add(new VideoListItem(url2, purl2));
+        mListItems.add(new VideoListItem(url3, purl3));
+        mListItems.add(new VideoListItem(url4, purl4));
+        mListItems.add(new VideoListItem(url, purl1));
+        mListItems.add(new VideoListItem(url2, purl2));
+        mListItems.add(new VideoListItem(url3, purl3));
+        mListItems.add(new VideoListItem(url4, purl4));
+        mListItems.add(new VideoListItem(url, purl1));
+        mListItems.add(new VideoListItem(url2, purl2));
+        mListItems.add(new VideoListItem(url3, purl3));
+        mListItems.add(new VideoListItem(url4, purl4));
+        mListItems.add(new VideoListItem(url, purl1));
+        mListItems.add(new VideoListItem(url2, purl2));
+        mListItems.add(new VideoListItem(url3, purl3));
+        mListItems.add(new VideoListItem(url4, purl4));
+        mListItems.add(new VideoListItem(url, purl1));
+        mListItems.add(new VideoListItem(url2, purl2));
+        mListItems.add(new VideoListItem(url3, purl3));
+        mListItems.add(new VideoListItem(url4, purl4));
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -111,23 +105,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(VideoViewHolder holder, int position) {
             VideoListItem item = mListItems.get(position);
-            Log.e("VideoListItem", "preFilePath " + item.getFilePath() + " prepos " + item.getPosition()
+            Log.i("VideoListItem", "preFilePath " + item.getVideoPath() + " prepos " + item.getPosition()
                     + " curpos " + position);
-            item.setViewHolder(holder);
-            item.setPosition(position);
-
-            Glide.with(holder.itemView.getContext())
-                    .load("http://10.33.91.71/test/small/pg/20160316/6542116569848217601803281515.jpg")
-                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .into(holder.videoCover);
-
-            Glide.with(holder.itemView.getContext())
-                    .using(new HttpUrlGlideUrlLoader(), InputStream.class)
-                    .load(new GlideUrl(item.getHttpUrl()))
-                    .as(File.class)
-                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                    .into(new VideoViewTarget(holder.videoView, holder.videoCover, item));
-            holder.videoTitle.setText(String.format("Video Position %s", position));
+            item.bindViewHolder(position, holder);
+            holder.bind(item);
         }
 
         @Override

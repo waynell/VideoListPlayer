@@ -27,4 +27,9 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.2.0'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile project(':list-visibility-utils')
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.mikhaellopez:circularprogressbar:1.1.1'
+    compile ('com.github.bumptech.glide:okhttp3-integration:1.4.0'){
+        exclude group: 'glide-parent'
+    }
 }
