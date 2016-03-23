@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -104,11 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(VideoViewHolder holder, int position) {
-            VideoListItem item = mListItems.get(position);
-            Log.i("VideoListItem", "preFilePath " + item.getVideoPath() + " prepos " + item.getPosition()
-                    + " curpos " + position);
-            item.bindViewHolder(position, holder);
-            holder.bind(item);
+            holder.bind(position, mListItems.get(position));
         }
 
         @Override

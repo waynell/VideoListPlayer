@@ -3,9 +3,10 @@ package com.waynell.videolist.model;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.volokh.danylo.visibility_utils.items.ListItem;
-import com.waynell.videolist.VideoViewHolder;
+import com.waynell.videolist.ui.TextureVideoView;
 
 /**
  * @author Wayne
@@ -18,11 +19,11 @@ public class VideoListItem implements ListItem {
 
     private int mState = STATE_IDLE;
 
-    private int mPosition;
     private String mCoverUrl;
     private String mVideoUrl;
     private String mVideoPath;
-    private VideoViewHolder mViewHolder;
+    private ImageView mVideoCover;
+    private TextureVideoView mVideoView;
     private final Rect mCurrentViewRect = new Rect();
 
     public VideoListItem(String videoUrl, String coverUrl) {
@@ -34,28 +35,19 @@ public class VideoListItem implements ListItem {
         return mCoverUrl;
     }
 
-    public int getPosition() {
-        return mPosition;
-    }
-
-    public void bindViewHolder(int position, VideoViewHolder viewHolder) {
-        mPosition = position;
-        mViewHolder = viewHolder;
+    public void bindView(TextureVideoView videoView, ImageView videoCover) {
+        mVideoView = videoView;
+        mVideoCover = videoCover;
     }
 
     public void setVideoPath(String videoPath) {
-        Log.e("VideoListItem", "setVideoPath " + videoPath + " pos " + mPosition);
         mVideoPath = videoPath;
         if(videoPath != null) {
             if (mState == STATE_ACTIVED) {
-                mViewHolder.videoView.setVideoPath(videoPath);
-                mViewHolder.videoView.start();
+                mVideoView.setVideoPath(videoPath);
+                mVideoView.start();
             }
         }
-    }
-
-    public String getVideoPath() {
-        return mVideoPath;
     }
 
     public String getVideoUrl() {
@@ -93,8 +85,8 @@ public class VideoListItem implements ListItem {
         Log.e("VideoListItem", "setActive " + newActiveViewPosition + " path " + mVideoPath);
         mState = STATE_ACTIVED;
         if (mVideoPath != null) {
-            mViewHolder.videoView.setVideoPath(mVideoPath);
-            mViewHolder.videoView.start();
+            mVideoView.setVideoPath(mVideoPath);
+            mVideoView.start();
         }
     }
 
@@ -102,8 +94,8 @@ public class VideoListItem implements ListItem {
     public void deactivate(View currentView, int position) {
         Log.e("VideoListItem", "deactivate " + position);
         mState = STATE_DEACTIVED;
-        mViewHolder.videoView.stop();
-        mViewHolder.videoCover.setVisibility(View.VISIBLE);
-        mViewHolder.videoCover.setAlpha(1.f);
+        mVideoView.stop();
+        mVideoCover.setVisibility(View.VISIBLE);
+        mVideoCover.setAlpha(1.f);
     }
 }

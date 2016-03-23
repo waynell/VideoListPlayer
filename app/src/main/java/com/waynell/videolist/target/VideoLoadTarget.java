@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -52,7 +51,6 @@ public class VideoLoadTarget extends ViewTarget<TextureVideoView, File> implemen
 
     @Override
     public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-        Log.i("VideoViewTarget", "onResourceReady " + mItem.getPosition() + " path " + resource.getAbsolutePath());
         mItem.setVideoPath(resource.getAbsolutePath());
     }
 

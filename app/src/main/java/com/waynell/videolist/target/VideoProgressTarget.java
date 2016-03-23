@@ -15,6 +15,8 @@ public class VideoProgressTarget extends ProgressTarget<String, File> {
     public VideoProgressTarget(VideoLoadTarget target, CircularProgressBar progress) {
         super(target);
         this.progress = progress;
+        this.progress.setVisibility(View.INVISIBLE);
+        this.progress.setProgress(0);
     }
 
     @Override
@@ -25,6 +27,7 @@ public class VideoProgressTarget extends ProgressTarget<String, File> {
     @Override
     protected void onConnecting() {
         progress.setVisibility(View.VISIBLE);
+        progress.setProgress(0);
     }
 
     @Override

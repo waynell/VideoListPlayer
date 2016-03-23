@@ -45,9 +45,10 @@ public class VideoViewHolder extends RecyclerView.ViewHolder {
         progressTarget = new VideoProgressTarget(videoTarget, progressBar);
     }
 
-    public void bind(VideoListItem item) {
+    public void bind(int position, VideoListItem item) {
+        item.bindView(videoView, videoCover);
         videoTarget.bind(item);
-        videoTitle.setText(String.format("Video Position %s", item.getPosition()));
+        videoTitle.setText(String.format("Video Position %s", position));
         progressTarget.setModel(item.getVideoUrl());
         Glide.with(itemView.getContext())
                 .using(VideoListGlideModule.getOkHttpUrlLoader(), InputStream.class)
