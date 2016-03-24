@@ -88,7 +88,7 @@ public class TextureVideoView extends ScalableTextureView
     // release the media player in any state
     private void release(boolean cleartargetstate) {
         if (mMediaPlayer != null) {
-//            mMediaPlayer.reset();
+            mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
             mCurrentState = STATE_IDLE;
