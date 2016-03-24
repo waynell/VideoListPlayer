@@ -41,7 +41,7 @@ public class VideoLoadTarget extends ViewTarget<TextureVideoView, File> implemen
 
         Glide.with(mCoverView.getContext())
                 .load(item.getCoverUrl())
-                .placeholder(new ColorDrawable(0xDDDDDD))
+                .placeholder(new ColorDrawable(0xffdcdcdc))
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .into(mCoverView);
 

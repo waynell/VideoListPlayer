@@ -43,8 +43,8 @@ public class VideoListItem implements ListItem {
     public void setVideoPath(String videoPath) {
         mVideoPath = videoPath;
         if(videoPath != null) {
-            if (mState == STATE_ACTIVED) {
-                mVideoView.setVideoPath(videoPath);
+            mVideoView.setVideoPath(videoPath);
+            if(mState == STATE_ACTIVED) {
                 mVideoView.start();
             }
         }

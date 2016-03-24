@@ -6,6 +6,9 @@ import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
@@ -21,6 +24,7 @@ import java.io.IOException;
  */
 public class TextureVideoView extends ScalableTextureView
         implements TextureView.SurfaceTextureListener,
+        Handler.Callback,
         MediaPlayer.OnPreparedListener,
         MediaPlayer.OnVideoSizeChangedListener,
         MediaPlayer.OnCompletionListener,
@@ -41,12 +45,23 @@ public class TextureVideoView extends ScalableTextureView
     private static final int STATE_PAUSED             = 4;
     private static final int STATE_PLAYBACK_COMPLETED = 5;
 
+    private static final int MSG_START = 0x0001;
+    private static final int MSG_PAUSE = 0x0004;
+    private static final int MSG_STOP = 0x0006;
+
     private Uri mUri;
     private Context mContext;
     private Surface mSurface;
     private MediaPlayer mMediaPlayer;
 
     private Callback mCallback;
+    private Handler mHandler;
+    private Handler mVideoHandler;
+
+    private static final HandlerThread sThread = new HandlerThread("VideoPlayThread");
+    static {
+        sThread.start();
+    }
 
     public interface Callback {
         void onPrepared(MediaPlayer mp);
@@ -77,10 +92,44 @@ public class TextureVideoView extends ScalableTextureView
         mCallback = callback;
     }
 
+    @Override
+    public boolean handleMessage(Message msg) {
+        synchronized (TextureVideoView.class) {
+            switch (msg.what) {
+
+                case MSG_START:
+                    Log.i(TAG, "<< handleMessage init");
+                    openVideo();
+                    Log.i(TAG, ">> handleMessage init");
+                    break;
+
+
+                case MSG_PAUSE:
+                    Log.i(TAG, "<< handleMessage pause");
+                    if(mMediaPlayer != null) {
+                        mMediaPlayer.pause();
+                    }
+                    mCurrentState = STATE_PAUSED;
+                    Log.i(TAG, ">> handleMessage pause");
+                    break;
+
+                case MSG_STOP:
+                    Log.i(TAG, "<< handleMessage stop");
+                    release(true);
+                    Log.i(TAG, ">> handleMessage stop");
+                    break;
+
+            }
+        }
+        return true;
+    }
+
     private void init() {
         mContext = getContext();
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
+        mHandler = new Handler();
+        mVideoHandler = new Handler(sThread.getLooper(), this);
         setSurfaceTextureListener(this);
     }
 
@@ -109,9 +158,6 @@ public class TextureVideoView extends ScalableTextureView
         // called start() previously
         release(false);
 
-//        AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-//        am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-
         try {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnPreparedListener(this);
@@ -129,28 +175,41 @@ public class TextureVideoView extends ScalableTextureView
             // we don't set the target state here either, but preserve the
             // target state that was there before.
             mCurrentState = STATE_PREPARING;
+            mTargetState = STATE_PREPARING;
         } catch (IOException ex) {
             Log.w(TAG, "Unable to open content: " + mUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
             if (mCallback != null) {
-                mCallback.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallback.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                    }
+                });
             }
         } catch (IllegalArgumentException ex) {
             Log.w(TAG, "Unable to open content: " + mUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
             if (mCallback != null) {
-                mCallback.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCallback.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
+                    }
+                });
             }
         }
     }
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.i(TAG, "onSurfaceTextureAvailable");
         mSurface = new Surface(surface);
-        openVideo();
+        if(mTargetState == STATE_PLAYING) {
+            Log.i(TAG, "onSurfaceTextureAvailable start");
+            start();
+        }
     }
 
     @Override
@@ -161,7 +220,7 @@ public class TextureVideoView extends ScalableTextureView
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         mSurface = null;
-        release(true);
+        stop();
         return true;
     }
 
@@ -177,46 +236,39 @@ public class TextureVideoView extends ScalableTextureView
     public void setVideoURI(Uri uri) {
         Log.i(TAG, "setVideoURI " + uri.toString());
         mUri = uri;
-        openVideo();
-        requestLayout();
     }
 
     public void start() {
-        if (isInPlaybackState()) {
-            mMediaPlayer.start();
-            mCurrentState = STATE_PLAYING;
-        }
         mTargetState = STATE_PLAYING;
+
+        if (isInPlaybackState()) {
+            mVideoHandler.obtainMessage(MSG_STOP).sendToTarget();
+        }
+
+        if(mUri != null && mSurface != null) {
+            mVideoHandler.obtainMessage(MSG_START).sendToTarget();
+        }
     }
 
     public void pause() {
-        if (isInPlaybackState()) {
-            if (mMediaPlayer.isPlaying()) {
-                mMediaPlayer.pause();
-                mCurrentState = STATE_PAUSED;
-            }
+        if (isPlaying()) {
+            mVideoHandler.obtainMessage(MSG_PAUSE).sendToTarget();
         }
         mTargetState = STATE_PAUSED;
     }
 
-    public void suspend() {
-        release(false);
-    }
-
     public void resume() {
-        openVideo();
+        if (!isPlaying()) {
+            mVideoHandler.obtainMessage(MSG_START).sendToTarget();
+        }
+        mTargetState = STATE_PLAYING;
     }
 
     public void stop() {
-        if (mMediaPlayer != null) {
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
-            mCurrentState = STATE_IDLE;
-            mTargetState  = STATE_IDLE;
-//            AudioManager am = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-//            am.abandonAudioFocus(null);
+        if(isInPlaybackState()) {
+            mVideoHandler.obtainMessage(MSG_STOP).sendToTarget();
         }
+        mTargetState = STATE_PLAYBACK_COMPLETED;
     }
 
     public boolean isPlaying() {
@@ -231,50 +283,90 @@ public class TextureVideoView extends ScalableTextureView
     }
 
     @Override
-    public void onCompletion(MediaPlayer mp) {
+    public void onCompletion(final MediaPlayer mp) {
         mCurrentState = STATE_PLAYBACK_COMPLETED;
         mTargetState = STATE_PLAYBACK_COMPLETED;
         if (mCallback != null) {
-            mCallback.onCompletion(mp);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onCompletion(mp);
+                }
+            });
         }
     }
 
     @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
+    public boolean onError(final MediaPlayer mp, final int what, final int extra) {
         Log.e(TAG, "onError() called with " + "mp = [" + mp + "], what = [" + what + "], extra = [" + extra + "]");
         mCurrentState = STATE_ERROR;
         mTargetState = STATE_ERROR;
-        return mCallback != null && mCallback.onError(mp, what, extra);
+        if (mCallback != null) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onError(mp, what, extra);
+                }
+            });
+        }
+        return true ;
     }
 
     @Override
-    public void onPrepared(MediaPlayer mp) {
+    public void onPrepared(final MediaPlayer mp) {
         Log.i(TAG, "onPrepared " + mUri.toString());
         mCurrentState = STATE_PREPARED;
-        if (mTargetState == STATE_PLAYING) {
-            start();
+
+        if (isInPlaybackState()) {
+            mMediaPlayer.start();
+            mCurrentState = STATE_PLAYING;
+            mTargetState = STATE_PLAYING;
         }
+
         if (mCallback != null) {
-            mCallback.onPrepared(mp);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onPrepared(mp);
+                }
+            });
         }
     }
 
     @Override
-    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+    public void onVideoSizeChanged(final MediaPlayer mp, final int width, final int height) {
         if (mCallback != null) {
-            mCallback.onVideoSizeChanged(mp, width, height);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onVideoSizeChanged(mp, width, height);
+                }
+            });
         }
     }
 
     @Override
-    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+    public void onBufferingUpdate(final MediaPlayer mp, final int percent) {
         if (mCallback != null) {
-            mCallback.onBufferingUpdate(mp, percent);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onBufferingUpdate(mp, percent);
+                }
+            });
         }
     }
 
     @Override
-    public boolean onInfo(MediaPlayer mp, int what, int extra) {
-        return mCallback != null && mCallback.onInfo(mp, what, extra);
+    public boolean onInfo(final MediaPlayer mp, final int what, final int extra) {
+        if (mCallback != null) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCallback.onInfo(mp, what, extra);
+                }
+            });
+        }
+        return true;
     }
 }
