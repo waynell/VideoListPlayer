@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.waynell.videolist"
+<manifest package="com.waynell.videolist.demo"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <meta-data android:name="com.waynell.videolist.VideoListGlideModule"
+        <meta-data android:name="com.waynell.videolist.demo.VideoListGlideModule"
             android:value="GlideModule"/>
     </application>
 

@@ -1,1 +1,1 @@
-include ':app', ':list-visibility-utils'
+include ':app', ':video-list-player'
