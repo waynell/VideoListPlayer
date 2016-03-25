@@ -1,5 +1,4 @@
 # VideoListPlayer
----
 VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并播放视频，并支持滑动时自动播放/暂停的功能
 
 利用该项目，可以轻松实现类似Instagram的视频播放功能
@@ -7,11 +6,9 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 **注意：最低支持API 14以上**
 
 #效果预览
----
 ![](./art/preview.gif)
 
 #基本用法
----
 在xml布局中加入以下代码
 
 	<com.waynell.videolist.widget.TextureVideoView
@@ -40,7 +37,6 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 
 
 #滑动时自动播放/停止的功能
----
 首先你的adapter models必须先实现ListItem接口
 	
     public interface ListItem {
@@ -78,16 +74,13 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
         });
         
 # 网络视频的本地缓存
----
 请参考demo工程的实现
 
 
 #实现原理
----
-请参见我的博客[地址](http://)
+请参见我的博客[视频在滑动列表中的异步缓存和播放](http://blog.waynell.com/2016/03/21/video-loader/)
 
 
 #Thanks
----
 [VideoPlayerManager](https://github.com/danylovolokh/VideoPlayerManager)
 滑动自动播放/暂停的功能基于项目优化而来
