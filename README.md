@@ -9,6 +9,16 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 ![](./art/preview.gif)
 
 #基本用法
+添加gradle依赖
+	
+	repositories {
+		maven { url "https://jitpack.io" }
+	}
+	
+	dependencies {
+	        compile 'com.github.waynell:VideoListPlayer:1.0'
+	}
+
 在xml布局中加入以下代码
 
 	<com.waynell.videolist.widget.TextureVideoView
@@ -78,7 +88,7 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 
 
 #实现原理
-请参见我的博客[视频在滑动列表中的异步缓存和播放](http://blog.waynell.com/2016/03/21/video-loader/)
+请参见我的博客 [视频在滑动列表中的异步缓存和播放](http://blog.waynell.com/2016/03/21/video-loader/)
 
 
 #Thanks
