@@ -8,6 +8,13 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 #效果预览
 ![](./art/preview.gif)
 
+#Changelogs
+**v1.1**
+1. 自动播放/停止功能性能优化
+2. 视频播放加入声音开关控制，默认播放视频关闭声音，点击视频开启声音
+3. fix在4.1.1以下无法播放视频的bug
+
+
 #基本用法
 添加gradle依赖
 	
@@ -16,7 +23,7 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 	}
 	
 	dependencies {
-	        compile 'com.github.waynell:VideoListPlayer:1.0'
+	        compile 'com.github.waynell:VideoListPlayer:1.1'
 	}
 
 在xml布局中加入以下代码
@@ -47,11 +54,9 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 
 
 #滑动时自动播放/停止的功能
-首先你的adapter models必须先实现ListItem接口
+首先，你必须实现ListItem接口来获取item被激活或取消激活的事件回调
 	
     public interface ListItem {
-    	// 返回当前item view的可见比
-        int getVisibilityPercents(View view);
         
         // 当前item被激活
         void setActive(View newActiveView, int newActiveViewPosition);
@@ -60,26 +65,34 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
         void deactivate(View currentView, int position);
 	}
 
+其次，实现ItemsProvider接口返回当前列表总数和列表中某一位置的ListItem实例
+	
+    public interface ItemsProvider {
+
+    	ListItem getListItem(int position);
+
+    	int listItemSize();
+	}
 
 最后添加以下代码实现可见比的计算，以RecyclerView为例
+	
+    ItemsProvider itemProvider;
 
-	ListItemsVisibilityCalculator calculator = new SingleListViewItemActiveCalculator(new
-            DefaultSingleItemCalculatorCallback(), mListItems);
-            
-    mItemsPositionGetter = new RecyclerViewItemPositionGetter(layoutManager, mRecyclerView);
+	ListItemsVisibilityCalculator calculator = new SingleListViewItemActiveCalculator(itemProvider,
+    	new RecyclerViewItemPositionGetter(layoutManager, mRecyclerView););
     
     mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 mScrollState = newState;
                 if(newState == RecyclerView.SCROLL_STATE_IDLE && !mListItems.isEmpty()){
-                    mCalculator.onScrollStateIdle(mItemsPositionGetter);
+                    mCalculator.onScrollStateIdle();
                 }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                mCalculator.onScrolled(mItemsPositionGetter, mScrollState);
+                mCalculator.onScrolled(mScrollState);
             }
         });
         
