@@ -1,19 +1,13 @@
 package com.waynell.videolist.demo.target;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
-import android.view.View;
-import android.widget.ImageView;
+import android.os.Build;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
-import com.waynell.videolist.demo.model.VideoListItem;
+import com.waynell.videolist.demo.model.VideoLoadMvpView;
 import com.waynell.videolist.widget.TextureVideoView;
 
 import java.io.File;
@@ -23,35 +17,18 @@ import java.io.File;
  */
 public class VideoLoadTarget extends ViewTarget<TextureVideoView, File> implements TextureVideoView.MediaPlayerCallback {
 
-    private VideoListItem mItem;
-    private final ImageView mCoverView;
 
-    public VideoLoadTarget(TextureVideoView videoView, ImageView coverView) {
-        super(videoView);
-        mCoverView = coverView;
-    }
+    private final VideoLoadMvpView mLoadMvpView;
 
-    public void bind(VideoListItem item) {
-        mItem = item;
-        if (mCoverView.animate() != null) {
-            mCoverView.animate().cancel();
-        }
-        mCoverView.setVisibility(View.VISIBLE);
-        mCoverView.setAlpha(1.f);
-
-        Glide.with(mCoverView.getContext())
-                .load(item.getCoverUrl())
-                .placeholder(new ColorDrawable(0xffdcdcdc))
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .into(mCoverView);
-
+    public VideoLoadTarget(VideoLoadMvpView mvpView) {
+        super(mvpView.getVideoView());
         view.setMediaPlayerCallback(this);
-        view.stop();
+        mLoadMvpView = mvpView;
     }
 
     @Override
     public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-        mItem.setVideoPath(resource.getAbsolutePath());
+        mLoadMvpView.videoResourceReady(resource.getAbsolutePath());
     }
 
     @Override
@@ -61,46 +38,38 @@ public class VideoLoadTarget extends ViewTarget<TextureVideoView, File> implemen
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        if (mCoverView.animate() != null) {
-            mCoverView.animate().cancel();
-        }
-        mCoverView.setAlpha(1.f);
-        mCoverView.setVisibility(View.VISIBLE);
+        mLoadMvpView.videoStopped();
         return true;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-
+        mLoadMvpView.videoPrepared(mp);
+        // it is better call when video rendering start, but this flag is added in API 17
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mLoadMvpView.videoBeginning();
+        }
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        // do nothing
     }
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-
+        // do nothing
     }
 
     @Override
     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-
+        // do nothing
     }
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
         if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
-            mCoverView.animate()
-                    .alpha(0)
-                    .setDuration(500)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mCoverView.setVisibility(View.INVISIBLE);
-                        }
-                    });
+            mLoadMvpView.videoBeginning();
             return true;
         }
         return false;

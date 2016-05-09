@@ -2,13 +2,14 @@ package com.waynell.videolist.visibility.items;
 
 import android.view.View;
 
-import java.util.List;
-
-
+/**
+ * @author Wayne
+ */
 public class ListItemData {
 
     private Integer mIndexInAdapter;
     private View mView;
+    private ListItem mListItem;
 
     private boolean mIsVisibleItemChanged;
 
@@ -20,18 +21,19 @@ public class ListItemData {
         return mView;
     }
 
-    public com.waynell.videolist.visibility.items.ListItemData fillWithData(int indexInAdapter, View view) {
+    public ListItem getListItem() {
+        return mListItem;
+    }
+
+    public ListItemData fillWithData(int indexInAdapter, View view, ListItem item) {
         mIndexInAdapter = indexInAdapter;
         mView = view;
+        mListItem = item;
         return this;
     }
 
     public boolean isAvailable() {
-        return mIndexInAdapter != null && mView != null;
-    }
-
-    public int getVisibilityPercents(List<? extends ListItem> listItems) {
-        return listItems.get(getIndex()).getVisibilityPercents(getView());
+        return mIndexInAdapter != null && mView != null && mListItem != null;
     }
 
     public void setVisibleItemChanged(boolean isDataChanged) {
@@ -47,6 +49,7 @@ public class ListItemData {
         return "ListItemData{" +
                 "mIndexInAdapter=" + mIndexInAdapter +
                 ", mView=" + mView +
+                ", mListItem=" + mListItem +
                 ", mIsVisibleItemChanged=" + mIsVisibleItemChanged +
                 '}';
     }
@@ -56,11 +59,10 @@ public class ListItemData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        com.waynell.videolist.visibility.items.ListItemData that = (com.waynell.videolist.visibility.items.ListItemData) o;
+        ListItemData that = (ListItemData) o;
 
-        if (mIndexInAdapter != null ? !mIndexInAdapter.equals(that.mIndexInAdapter) : that.mIndexInAdapter != null)
-            return false;
-        return mView != null ? mView.equals(that.mView) : that.mView == null;
+        return (mIndexInAdapter != null ? mIndexInAdapter.equals(that.mIndexInAdapter) : that.mIndexInAdapter == null)
+                && (mView != null ? mView.equals(that.mView) : that.mView == null);
 
     }
 

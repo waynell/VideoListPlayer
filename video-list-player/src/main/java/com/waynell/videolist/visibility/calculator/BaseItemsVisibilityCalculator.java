@@ -4,54 +4,55 @@ import android.widget.AbsListView;
 
 import com.waynell.videolist.visibility.scroll.ItemsPositionGetter;
 import com.waynell.videolist.visibility.scroll.ScrollDirectionDetector;
-import com.waynell.videolist.visibility.utils.Config;
-import com.waynell.videolist.visibility.utils.Logger;
+
 
 /**
  * This class encapsulates some basic logic of Visibility calculator.
  * In onScroll event it calculates Scroll direction using {@link com.waynell.videolist.visibility.scroll.ScrollDirectionDetector}
  * and then calls appropriate methods
+ *
+ * @author Wayne
  */
 public abstract class BaseItemsVisibilityCalculator implements ListItemsVisibilityCalculator{
-
-    private static final boolean SHOW_LOGS = Config.SHOW_LOGS;
-    private static final String TAG = BaseItemsVisibilityCalculator.class.getSimpleName();
 
     /** Initial scroll direction should be UP in order to set as active most top item if no active item yet*/
     protected ScrollDirectionDetector.ScrollDirection mScrollDirection = ScrollDirectionDetector.ScrollDirection.UP;
 
-    private final ScrollDirectionDetector mScrollDirectionDetector = new ScrollDirectionDetector(new ScrollDirectionDetector.OnDetectScrollListener() {
+    protected final ItemsPositionGetter mPositionGetter;
+
+    public BaseItemsVisibilityCalculator(ItemsPositionGetter positionGetter) {
+        mPositionGetter = positionGetter;
+    }
+
+    private final ScrollDirectionDetector mScrollDirectionDetector = new ScrollDirectionDetector(
+            new ScrollDirectionDetector.OnDetectScrollListener() {
         @Override
         public void onScrollDirectionChanged(ScrollDirectionDetector.ScrollDirection scrollDirection) {
-            if (SHOW_LOGS) Logger.v(TAG, "onScrollDirectionChanged, scrollDirection " + scrollDirection);
             mScrollDirection = scrollDirection;
         }
     });
 
     @Override
-    public void onScrolled(ItemsPositionGetter itemsPositionGetter, int scrollState) {
-        int firstVisiblePosition = itemsPositionGetter.getFirstVisiblePosition();
+    public void onScrolled(int scrollState) {
+        int firstVisiblePosition = mPositionGetter.getFirstVisiblePosition();
 
-        if (SHOW_LOGS)
-            Logger.v(TAG, "onScroll, firstVisibleItem " + firstVisiblePosition + "scrollState " + scrollState);
-
-        mScrollDirectionDetector.onDetectedListScroll(itemsPositionGetter, firstVisiblePosition);
+        mScrollDirectionDetector.onDetectedListScroll(mPositionGetter, firstVisiblePosition);
 
         switch (scrollState) {
             case AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-                onStateTouchScroll(itemsPositionGetter);
+                onStateTouchScroll(mPositionGetter);
                 break;
             case AbsListView.OnScrollListener.SCROLL_STATE_FLING:
-                onStateFling(itemsPositionGetter);
+                onStateTouchScroll(mPositionGetter);
                 break;
 
             case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
-                onScrollStateIdle(itemsPositionGetter);
+                onScrollStateIdle();
                 break;
         }
     }
 
-    protected abstract void onStateFling(ItemsPositionGetter itemsPositionGetter);
+    public abstract void onStateLost();
 
     protected abstract void onStateTouchScroll(ItemsPositionGetter itemsPositionGetter);
 

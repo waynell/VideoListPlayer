@@ -7,7 +7,7 @@ import android.widget.ListView;
  * This class is an API for {@link com.waynell.videolist.visibility.calculator.ListItemsVisibilityCalculator}
  * Using this class is can access all the data from ListView
  *
- * Created by danylo.volokh on 1/17/2016.
+ * @author Wayne
  */
 public class ListViewItemPositionGetter implements ItemsPositionGetter {
 

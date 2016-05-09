@@ -7,10 +7,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.waynell.videolist.demo.model.VideoListItem;
-import com.waynell.videolist.visibility.calculator.DefaultSingleItemCalculatorCallback;
+import com.waynell.videolist.demo.model.VideoItem;
 import com.waynell.videolist.visibility.calculator.SingleListViewItemActiveCalculator;
-import com.waynell.videolist.visibility.scroll.ItemsPositionGetter;
+import com.waynell.videolist.visibility.items.ListItem;
+import com.waynell.videolist.visibility.scroll.ItemsProvider;
 import com.waynell.videolist.visibility.scroll.RecyclerViewItemPositionGetter;
 
 import java.util.ArrayList;
@@ -26,12 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int mScrollState;
 
-    private ItemsPositionGetter mItemsPositionGetter;
-
-    private List<VideoListItem> mListItems = new ArrayList<>();
-
-    private SingleListViewItemActiveCalculator mCalculator = new SingleListViewItemActiveCalculator(new
-            DefaultSingleItemCalculatorCallback(), mListItems);
+    private SingleListViewItemActiveCalculator mCalculator;
 
     private static final String url = "http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_1mb.mp4";
 
@@ -52,48 +47,60 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mListItems.add(new VideoListItem(url, purl1));
-        mListItems.add(new VideoListItem(url2, purl2));
-        mListItems.add(new VideoListItem(url3, purl3));
-        mListItems.add(new VideoListItem(url4, purl4));
-        mListItems.add(new VideoListItem(url, purl1));
-        mListItems.add(new VideoListItem(url2, purl2));
-        mListItems.add(new VideoListItem(url3, purl3));
-        mListItems.add(new VideoListItem(url4, purl4));
-        mListItems.add(new VideoListItem(url, purl1));
-        mListItems.add(new VideoListItem(url2, purl2));
-        mListItems.add(new VideoListItem(url3, purl3));
-        mListItems.add(new VideoListItem(url4, purl4));
-        mListItems.add(new VideoListItem(url, purl1));
-        mListItems.add(new VideoListItem(url2, purl2));
-        mListItems.add(new VideoListItem(url3, purl3));
-        mListItems.add(new VideoListItem(url4, purl4));
-        mListItems.add(new VideoListItem(url, purl1));
-        mListItems.add(new VideoListItem(url2, purl2));
-        mListItems.add(new VideoListItem(url3, purl3));
-        mListItems.add(new VideoListItem(url4, purl4));
+        final VideoListAdapter adapter = new VideoListAdapter();
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        mCalculator = new SingleListViewItemActiveCalculator(adapter,
+                new RecyclerViewItemPositionGetter(layoutManager, mRecyclerView));
+
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(new VideoListAdapter());
-        mItemsPositionGetter = new RecyclerViewItemPositionGetter(layoutManager, mRecyclerView);
+        mRecyclerView.setAdapter(adapter);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 mScrollState = newState;
-                if(newState == RecyclerView.SCROLL_STATE_IDLE && !mListItems.isEmpty()){
-                    mCalculator.onScrollStateIdle(mItemsPositionGetter);
+                if(newState == RecyclerView.SCROLL_STATE_IDLE && adapter.getItemCount() > 0){
+                    mCalculator.onScrollStateIdle();
                 }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                mCalculator.onScrolled(mItemsPositionGetter, mScrollState);
+                mCalculator.onScrolled(mScrollState);
             }
         });
     }
 
-    private class VideoListAdapter extends RecyclerView.Adapter<VideoViewHolder> {
+    private class VideoListAdapter extends RecyclerView.Adapter<VideoViewHolder> implements ItemsProvider {
+
+        private List<VideoItem> mListItems = new ArrayList<>();
+
+        public VideoListAdapter() {
+            generateMockData();
+        }
+
+        private void generateMockData() {
+            mListItems.add(new VideoItem(url, purl1));
+            mListItems.add(new VideoItem(url2, purl2));
+            mListItems.add(new VideoItem(url3, purl3));
+            mListItems.add(new VideoItem(url4, purl4));
+            mListItems.add(new VideoItem(url, purl1));
+            mListItems.add(new VideoItem(url2, purl2));
+            mListItems.add(new VideoItem(url3, purl3));
+            mListItems.add(new VideoItem(url4, purl4));
+            mListItems.add(new VideoItem(url, purl1));
+            mListItems.add(new VideoItem(url2, purl2));
+            mListItems.add(new VideoItem(url3, purl3));
+            mListItems.add(new VideoItem(url4, purl4));
+            mListItems.add(new VideoItem(url, purl1));
+            mListItems.add(new VideoItem(url2, purl2));
+            mListItems.add(new VideoItem(url3, purl3));
+            mListItems.add(new VideoItem(url4, purl4));
+            mListItems.add(new VideoItem(url, purl1));
+            mListItems.add(new VideoItem(url2, purl2));
+            mListItems.add(new VideoItem(url3, purl3));
+            mListItems.add(new VideoItem(url4, purl4));
+        }
 
         @Override
         public VideoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -101,9 +108,13 @@ public class MainActivity extends AppCompatActivity {
                     .inflate(R.layout.video_list_item, parent, false));
         }
 
+        public VideoItem getItem(int position) {
+            return mListItems.get(position);
+        }
+
         @Override
         public void onBindViewHolder(VideoViewHolder holder, int position) {
-            holder.bind(position, mListItems.get(position));
+            holder.bind(position, getItem(position));
         }
 
         @Override
@@ -111,6 +122,19 @@ public class MainActivity extends AppCompatActivity {
             return mListItems.size();
         }
 
+        @Override
+        public ListItem getListItem(int position) {
+            RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
+            if (holder instanceof ListItem) {
+                return (ListItem) holder;
+            }
+            return null;
+        }
+
+        @Override
+        public int listItemSize() {
+            return getItemCount();
+        }
     }
 
 }

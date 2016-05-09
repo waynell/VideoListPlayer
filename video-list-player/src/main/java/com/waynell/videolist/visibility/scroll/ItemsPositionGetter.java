@@ -3,13 +3,13 @@ package com.waynell.videolist.visibility.scroll;
 import android.view.View;
 
 /**
- * This class is an API for {@link com.waynell.videolist.visibility.calculator.ListItemsVisibilityCalculator}
+ * This class is an API for {@link com.waynell.videolist.visibility.calculator.SingleListViewItemActiveCalculator}
  * Using this class is can access all the data from RecyclerView / ListView
  *
  * There is two different implementations for ListView and for RecyclerView.
  * RecyclerView introduced LayoutManager that's why some of data moved there
  *
- * Created by danylo.volokh on 9/20/2015.
+ * @author Wayne
  */
 public interface ItemsPositionGetter {
     View getChildAt(int position);
