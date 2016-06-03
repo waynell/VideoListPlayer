@@ -98,20 +98,22 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
      * @param outNextItemData - out parameter. It will be filled with next item data if the one exists
      */
     private void findNextItem(ItemsPositionGetter itemsPositionGetter, ListItemData currentIem, ListItemData outNextItemData) {
-        int nextItemIndex = currentIem.getIndex() + 1;
+        if(currentIem.isIndexValid()) {
+            int nextItemIndex = currentIem.getIndex() + 1;
 
-        if(nextItemIndex < mItemsProvider.listItemSize()){
-            int indexOfCurrentView = itemsPositionGetter.indexOfChild(currentIem.getView());
+            if (nextItemIndex < mItemsProvider.listItemSize()) {
+                int indexOfCurrentView = itemsPositionGetter.indexOfChild(currentIem.getView());
 
-            if(indexOfCurrentView >= 0){
-                View nextView = itemsPositionGetter.getChildAt(indexOfCurrentView + 1);
-                if(nextView != null){
-                    ListItem next = mItemsProvider.getListItem(nextItemIndex);
-                    if (next == null && SHOW_LOGS) {
-                        Log.e(TAG, "null list item");
+                if (indexOfCurrentView >= 0) {
+                    View nextView = itemsPositionGetter.getChildAt(indexOfCurrentView + 1);
+                    if (nextView != null) {
+                        ListItem next = mItemsProvider.getListItem(nextItemIndex);
+                        if (next == null && SHOW_LOGS) {
+                            Log.e(TAG, "null list item");
+                        }
+
+                        outNextItemData.fillWithData(nextItemIndex, nextView, next);
                     }
-
-                    outNextItemData.fillWithData(nextItemIndex, nextView, next);
                 }
             }
         }
@@ -129,19 +131,21 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
      * @param outPreviousItemData - out parameter. It will be filled with previous item data if the one exists
      */
     private void findPreviousItem(ItemsPositionGetter itemsPositionGetter, ListItemData currentIem, ListItemData outPreviousItemData) {
-        int previousItemIndex = currentIem.getIndex() -1;
+        if(currentIem.isIndexValid()) {
+            int previousItemIndex = currentIem.getIndex() - 1;
 
-        if(previousItemIndex >= 0){
-            int indexOfCurrentView = itemsPositionGetter.indexOfChild(currentIem.getView());
+            if (previousItemIndex >= 0) {
+                int indexOfCurrentView = itemsPositionGetter.indexOfChild(currentIem.getView());
 
-            if(indexOfCurrentView > 0){
-                View previousView = itemsPositionGetter.getChildAt(indexOfCurrentView - 1);
-                ListItem previous = mItemsProvider.getListItem(previousItemIndex);
-                if (previous == null && SHOW_LOGS) {
-                    Log.e(TAG, "null list item");
+                if (indexOfCurrentView > 0) {
+                    View previousView = itemsPositionGetter.getChildAt(indexOfCurrentView - 1);
+                    ListItem previous = mItemsProvider.getListItem(previousItemIndex);
+                    if (previous == null && SHOW_LOGS) {
+                        Log.e(TAG, "null list item");
+                    }
+
+                    outPreviousItemData.fillWithData(previousItemIndex, previousView, previous);
                 }
-
-                outPreviousItemData.fillWithData(previousItemIndex, previousView, previous);
             }
         }
     }
@@ -240,11 +244,11 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
                 mostVisibleItemVisibilityPercents = currentItemVisibilityPercents;
                 outMostVisibleItem.fillWithData(indexOfCurrentItem, currentView, listItem);
             }
-
-            boolean itemChanged = !mCurrentItem.equals(outMostVisibleItem);
-
-            outMostVisibleItem.setVisibleItemChanged(itemChanged);
         }
+
+        boolean itemChanged = !mCurrentItem.equals(outMostVisibleItem);
+
+        outMostVisibleItem.setVisibleItemChanged(itemChanged);
     }
 
     /**

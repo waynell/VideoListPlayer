@@ -27,16 +27,19 @@ public class VisibilityPercentsCalculator {
             return 0;
         }
 
-        view.getLocalVisibleRect(currentViewRect);
+        if(view.getLocalVisibleRect(currentViewRect)) {
 
-        if(viewIsPartiallyHiddenTop(currentViewRect)){
-            // view is partially hidden behind the top edge
-            percents = (height - currentViewRect.top) * 100 / height;
-        } else if(viewIsPartiallyHiddenBottom(currentViewRect, height)){
-            percents = currentViewRect.bottom * 100 / height;
+            if (viewIsPartiallyHiddenTop(currentViewRect)) {
+                // view is partially hidden behind the top edge
+                percents = (height - currentViewRect.top) * 100 / height;
+            } else if (viewIsPartiallyHiddenBottom(currentViewRect, height)) {
+                percents = currentViewRect.bottom * 100 / height;
+            }
+
+            return percents;
         }
 
-        return percents;
+        return 0;
     }
 
     private static boolean viewIsPartiallyHiddenBottom(Rect currentViewRect, int height) {

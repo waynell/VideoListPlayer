@@ -32,6 +32,10 @@ public class ListItemData {
         return this;
     }
 
+    public boolean isIndexValid() {
+        return mIndexInAdapter != null;
+    }
+
     public boolean isAvailable() {
         return mIndexInAdapter != null && mView != null && mListItem != null;
     }
