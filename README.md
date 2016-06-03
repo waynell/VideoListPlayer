@@ -10,6 +10,10 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 
 #Changelogs
 
+**v1.2**
+	
+	1. fix NPE bugs
+
 **v1.1**
 
 	1. 自动播放/停止功能性能优化
@@ -27,7 +31,7 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 	}
 	
 	dependencies {
-	        compile 'com.github.waynell:VideoListPlayer:1.1'
+	        compile 'com.github.waynell:VideoListPlayer:1.2'
 	}
 
 在xml布局中加入以下代码
