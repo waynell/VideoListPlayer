@@ -1,10 +1,9 @@
-package com.waynell.videolist.demo;
+package com.waynell.videolist.demo.holder;
 
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -15,23 +14,24 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
+import com.waynell.videolist.demo.BuildConfig;
+import com.waynell.videolist.demo.R;
+import com.waynell.videolist.demo.VideoListGlideModule;
 import com.waynell.videolist.demo.model.VideoItem;
 import com.waynell.videolist.demo.model.VideoLoadMvpView;
 import com.waynell.videolist.demo.target.VideoLoadTarget;
 import com.waynell.videolist.demo.target.VideoProgressTarget;
-import com.waynell.videolist.visibility.items.ListItem;
 import com.waynell.videolist.widget.TextureVideoView;
 
 import java.io.File;
 import java.io.InputStream;
 
 import butterknife.Bind;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
-public class VideoViewHolder extends RecyclerView.ViewHolder
-        implements ListItem, VideoLoadMvpView, ViewPropertyAnimatorListener {
+public class VideoViewHolder extends BaseViewHolder<VideoItem>
+        implements VideoLoadMvpView, ViewPropertyAnimatorListener {
 
     @Bind(R.id.video_view)
     public TextureVideoView videoView;
@@ -60,10 +60,8 @@ public class VideoViewHolder extends RecyclerView.ViewHolder
 
     public VideoViewHolder(View view) {
         super(view);
-        ButterKnife.bind(this, view);
 
         videoView.setAlpha(0);
-
         videoTarget = new VideoLoadTarget(this);
         progressTarget = new VideoProgressTarget(videoTarget, progressBar);
     }
@@ -92,7 +90,8 @@ public class VideoViewHolder extends RecyclerView.ViewHolder
         videoStopped();
     }
 
-    public void bind(int position, VideoItem item) {
+    @Override
+    public void onBind(int position, VideoItem item) {
         reset();
 
         videoTitle.setText(String.format("Video Position %s", position));

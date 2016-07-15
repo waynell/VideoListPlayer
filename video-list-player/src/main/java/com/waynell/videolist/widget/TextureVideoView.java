@@ -196,22 +196,23 @@ public class TextureVideoView extends ScalableTextureView
             mCurrentState = STATE_PREPARING;
             mTargetState = STATE_PREPARING;
 
+            mHasAudio = true;
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                MediaExtractor mediaExtractor = new MediaExtractor();
-                mediaExtractor.setDataSource(mContext, mUri, null);
-                MediaFormat format;
-                mHasAudio = false;
-                for (int i = 0; i < mediaExtractor.getTrackCount(); i++) {
-                    format = mediaExtractor.getTrackFormat(i);
-                    String mime = format.getString(MediaFormat.KEY_MIME);
-                    if (mime.startsWith("audio/")) {
-                        mHasAudio = true;
-                        break;
+                try {
+                    MediaExtractor mediaExtractor = new MediaExtractor();
+                    mediaExtractor.setDataSource(mContext, mUri, null);
+                    MediaFormat format;
+                    for (int i = 0; i < mediaExtractor.getTrackCount(); i++) {
+                        format = mediaExtractor.getTrackFormat(i);
+                        String mime = format.getString(MediaFormat.KEY_MIME);
+                        if (mime.startsWith("audio/")) {
+                            mHasAudio = true;
+                            break;
+                        }
                     }
+                } catch (Exception ex) {
+                    // may be failed to instantiate extractor.
                 }
-            }
-            else {
-                mHasAudio = true;
             }
 
         } catch (IOException ex) {
@@ -397,7 +398,6 @@ public class TextureVideoView extends ScalableTextureView
         mCurrentState = STATE_PREPARED;
 
         if (isInPlaybackState()) {
-            mute();
             mMediaPlayer.start();
             mCurrentState = STATE_PLAYING;
             mTargetState = STATE_PLAYING;

@@ -11,6 +11,7 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskLruCacheFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.module.GlideModule;
+import com.bumptech.glide.request.target.ViewTarget;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class VideoListGlideModule implements GlideModule {
 
     @Override
     public void applyOptions(final Context context, GlideBuilder builder) {
+        ViewTarget.setTagId(R.id.glide_loader);
         builder.setDiskCache(new DiskLruCacheFactory(new DiskLruCacheFactory.CacheDirectoryGetter
                 () {
             @Override
