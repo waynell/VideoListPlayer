@@ -13,6 +13,7 @@ import android.widget.ListView;
 
 import com.waynell.videolist.demo.R;
 import com.waynell.videolist.demo.holder.BaseViewHolder;
+import com.waynell.videolist.demo.holder.VideoViewHolder;
 import com.waynell.videolist.demo.holder.ViewHolderFactory;
 import com.waynell.videolist.demo.model.BaseItem;
 import com.waynell.videolist.demo.util.ItemUtils;
@@ -140,8 +141,8 @@ public class ListViewActivity extends AppCompatActivity {
             for (int i = 0; i < childCount; i++) {
                 View view = mListView.getChildAt(i);
                 if(view != null) {
-                    if (view.getTag() instanceof BaseViewHolder) {
-                        BaseViewHolder holder = (BaseViewHolder) view.getTag();
+                    if (view.getTag() instanceof VideoViewHolder) {
+                        VideoViewHolder holder = (VideoViewHolder) view.getTag();
                         int holderPosition = mHolderHelper.get(holder);
                         if (holderPosition == position) {
                             return holder;

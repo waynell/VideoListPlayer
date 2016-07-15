@@ -21,6 +21,7 @@ import com.waynell.videolist.demo.model.VideoItem;
 import com.waynell.videolist.demo.model.VideoLoadMvpView;
 import com.waynell.videolist.demo.target.VideoLoadTarget;
 import com.waynell.videolist.demo.target.VideoProgressTarget;
+import com.waynell.videolist.visibility.items.ListItem;
 import com.waynell.videolist.widget.TextureVideoView;
 
 import java.io.File;
@@ -31,7 +32,7 @@ import butterknife.OnClick;
 
 
 public class VideoViewHolder extends BaseViewHolder<VideoItem>
-        implements VideoLoadMvpView, ViewPropertyAnimatorListener {
+        implements VideoLoadMvpView, ViewPropertyAnimatorListener, ListItem {
 
     @Bind(R.id.video_view)
     public TextureVideoView videoView;
