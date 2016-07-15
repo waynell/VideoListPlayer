@@ -6,9 +6,13 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 **注意：最低支持API 14以上**
 
 #效果预览
-![](./art/preview.gif)
+![](./art/preview.gif) ![](./art/Screenshot_20160716.png)
 
 #Changelogs
+
+**v1.3**
+
+	fix在多类型列表元素中出现视频无法正常播放的bug
 
 **Demo 更新**
 	
@@ -37,7 +41,7 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 	}
 	
 	dependencies {
-	        compile 'com.github.waynell:VideoListPlayer:1.2'
+	        compile 'com.github.waynell:VideoListPlayer:1.3'
 	}
 
 在xml布局中加入以下代码
