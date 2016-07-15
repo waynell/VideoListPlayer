@@ -10,6 +10,12 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 
 #Changelogs
 
+**Demo 更新**
+	
+	1. 增加在ListView中播放视频的示例
+	2. ListView和RecyclerView中支持多类型view type展示
+
+
 **v1.2**
 	
 	1. fix NPE bugs
