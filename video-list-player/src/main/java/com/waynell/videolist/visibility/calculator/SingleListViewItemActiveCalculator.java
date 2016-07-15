@@ -28,7 +28,7 @@ import com.waynell.videolist.visibility.scroll.ItemsProvider;
 public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalculator {
 
     private static final String TAG = "ListViewItemActiveCal";
-    private static final boolean SHOW_LOGS = true;
+    private static final boolean SHOW_LOGS = false;
 
     private static final int INACTIVE_LIST_ITEM_VISIBILITY_PERCENTS = 70;
 
@@ -76,8 +76,11 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
 
         if(mCurrentItem.isVisibleItemChanged() && !mPreActiveItem.equals(mCurrentItem)) {
             if(SHOW_LOGS) {
-                Log.d(TAG, "onStateTouchScroll " + mCurrentItem + " " + VisibilityPercentsCalculator.getVisibilityPercents(mCurrentItem.getView())
-                        + " " + mPreActiveItem + " " + VisibilityPercentsCalculator.getVisibilityPercents(mPreActiveItem.getView()));
+                Log.d(TAG, "onStateTouchScroll " + mCurrentItem + " "
+                        + VisibilityPercentsCalculator.getVisibilityPercents(mCurrentItem.getView(),
+                        mCurrentItem.getListItem()) + " " + mPreActiveItem + " "
+                        + VisibilityPercentsCalculator.getVisibilityPercents(mPreActiveItem.getView(),
+                        mPreActiveItem.getListItem()));
             }
             mCallback.deactivateCurrentItem(mPreActiveItem.getListItem(),
                     mPreActiveItem.getView(),
@@ -160,8 +163,11 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
 
         if (mCurrentItem.isVisibleItemChanged() && !mPreActiveItem.equals(mCurrentItem)) {
             if(SHOW_LOGS) {
-                Log.d(TAG, "onScrollStateIdle " + mCurrentItem + " " + VisibilityPercentsCalculator.getVisibilityPercents(mCurrentItem.getView())
-                        + " " + mPreActiveItem + " " + VisibilityPercentsCalculator.getVisibilityPercents(mPreActiveItem.getView()));
+                Log.d(TAG, "onScrollStateIdle " + mCurrentItem + " "
+                        + VisibilityPercentsCalculator.getVisibilityPercents(mCurrentItem.getView(),
+                        mCurrentItem.getListItem()) + " " + mPreActiveItem + " "
+                        + VisibilityPercentsCalculator.getVisibilityPercents(mPreActiveItem.getView(),
+                        mPreActiveItem.getListItem()));
             }
             if (mPreActiveItem.isAvailable()) {
                 mCallback.deactivateCurrentItem(mPreActiveItem.getListItem(),
@@ -182,7 +188,8 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
     private void calculateMostVisibleItem(ItemsPositionGetter itemsPositionGetter, int firstVisiblePosition, int lastVisiblePosition) {
 
         ListItemData mostVisibleItem = getMockCurrentItem(itemsPositionGetter, firstVisiblePosition, lastVisiblePosition);
-        int maxVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(mostVisibleItem.getView());
+        int maxVisibilityPercents = VisibilityPercentsCalculator
+                .getVisibilityPercents(mostVisibleItem.getView(), mostVisibleItem.getListItem());
 
         switch (mScrollDirection){
             case UP:
@@ -206,12 +213,12 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
         int currentItemVisibilityPercents;
 
         for(int indexOfCurrentItem = itemsPositionGetter.getFirstVisiblePosition(), indexOfCurrentView = itemsPositionGetter.indexOfChild(outMostVisibleItem.getView())
-                ; indexOfCurrentView < itemsPositionGetter.getChildCount() // iterating via listView Items
+            ; indexOfCurrentView < itemsPositionGetter.getChildCount() // iterating via listView Items
                 ; indexOfCurrentItem++, indexOfCurrentView++){
 
             ListItem listItem = mItemsProvider.getListItem(indexOfCurrentItem);
             View currentView = itemsPositionGetter.getChildAt(indexOfCurrentView);
-            currentItemVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(currentView);
+            currentItemVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(currentView, listItem);
 
             if(currentItemVisibilityPercents > mostVisibleItemVisibilityPercents
                     && currentItemVisibilityPercents > INACTIVE_LIST_ITEM_VISIBILITY_PERCENTS){
@@ -232,12 +239,12 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
 
         int currentItemVisibilityPercents;
         for(int indexOfCurrentItem = itemsPositionGetter.getLastVisiblePosition(), indexOfCurrentView = itemsPositionGetter.indexOfChild(outMostVisibleItem.getView())
-                ; indexOfCurrentView >= 0 // iterating via listView Items
+            ; indexOfCurrentView >= 0 // iterating via listView Items
                 ; indexOfCurrentItem--, indexOfCurrentView--){
 
             ListItem listItem = mItemsProvider.getListItem(indexOfCurrentItem);
             View currentView = itemsPositionGetter.getChildAt(indexOfCurrentView);
-            currentItemVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(currentView);
+            currentItemVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(currentView, listItem);
 
             if(currentItemVisibilityPercents > mostVisibleItemVisibilityPercents &&
                     currentItemVisibilityPercents > INACTIVE_LIST_ITEM_VISIBILITY_PERCENTS){
@@ -296,7 +303,8 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
      */
     private void calculateActiveItem(ItemsPositionGetter itemsPositionGetter, ListItemData listItemData) {
         /** 1. */
-        int currentItemVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(listItemData.getView());
+        int currentItemVisibilityPercents = VisibilityPercentsCalculator
+                .getVisibilityPercents(listItemData.getView(), listItemData.getListItem());
 
         /** 2. */
         ListItemData neighbourItemData = new ListItemData();
@@ -310,7 +318,8 @@ public class SingleListViewItemActiveCalculator extends BaseItemsVisibilityCalcu
         }
 
         /** 3. */
-        int nextItemVisibilityPercents = VisibilityPercentsCalculator.getVisibilityPercents(neighbourItemData.getView());
+        int nextItemVisibilityPercents = VisibilityPercentsCalculator
+                .getVisibilityPercents(neighbourItemData.getView(), neighbourItemData.getListItem());
         if(enoughPercentsForDeactivation(currentItemVisibilityPercents, nextItemVisibilityPercents)
                 && neighbourItemData.isAvailable()){
 

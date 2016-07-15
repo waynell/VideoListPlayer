@@ -3,6 +3,8 @@ package com.waynell.videolist.visibility.calculator;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.waynell.videolist.visibility.items.ListItem;
+
 /**
  * @author Wayne
  */
@@ -14,9 +16,10 @@ public class VisibilityPercentsCalculator {
      *             Note: visibility doesn't have to depend on the visibility of a full view.
      *             It might be calculated by calculating the visibility of any inner View
      *
+     * @param item
      * @return percents of visibility
      */
-    public static int getVisibilityPercents(View view) {
+    public static int getVisibilityPercents(View view, ListItem item) {
         final Rect currentViewRect = new Rect();
 
         int percents = 100;
@@ -34,6 +37,11 @@ public class VisibilityPercentsCalculator {
                 percents = (height - currentViewRect.top) * 100 / height;
             } else if (viewIsPartiallyHiddenBottom(currentViewRect, height)) {
                 percents = currentViewRect.bottom * 100 / height;
+            }
+
+            // only ListItem's visibility could be 100 percent
+            if (item == null && percents == 100) {
+                percents--;
             }
 
             return percents;
