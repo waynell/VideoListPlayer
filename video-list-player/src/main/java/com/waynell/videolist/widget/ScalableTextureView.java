@@ -5,12 +5,17 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.TextureView;
+
+import com.waynell.videolist.BuildConfig;
 
 /**
  * This extension of {@link TextureView} is created to isolate scaling of this view.
  */
-public abstract class ScalableTextureView extends TextureView{
+public abstract class ScalableTextureView extends TextureView {
+
+    private static final String TAG = "TextureVideoView";
 
     private Integer mContentWidth;
     private Integer mContentHeight;
@@ -30,10 +35,10 @@ public abstract class ScalableTextureView extends TextureView{
 
     private final Matrix mTransformMatrix = new Matrix();
 
-    private ScaleType mScaleType;
+    private ScaleType mScaleType = ScaleType.FIT_CENTER;
 
     public enum ScaleType {
-        CENTER_CROP, TOP, BOTTOM, FILL
+        CENTER_CROP, TOP, BOTTOM, FILL, FIT_CENTER
     }
 
     public ScalableTextureView(Context context) {
@@ -71,6 +76,10 @@ public abstract class ScalableTextureView extends TextureView{
             throw new RuntimeException("null content size");
         }
 
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "ScalableTextureView content size: (" + mContentWidth + ", " + mContentWidth + ")");
+        }
+
         float viewWidth = getMeasuredWidth();
         float viewHeight = getMeasuredHeight();
 
@@ -81,7 +90,27 @@ public abstract class ScalableTextureView extends TextureView{
         float scaleX = 1.0f;
         float scaleY = 1.0f;
 
+        // Calculate pivot points, in our case crop from center
+        float pivotPointX = 0;
+        float pivotPointY = 0;
+
         switch (mScaleType) {
+            case FIT_CENTER: {
+                if (viewWidth * mContentHeight > viewHeight * mContentWidth) {
+                    float destW = viewHeight * mContentWidth / mContentHeight;
+                    scaleX = destW / viewWidth;
+                    pivotPointX = (viewWidth - destW) / 2f;
+                    pivotPointY = 0;
+                } else {
+                    float destH = viewWidth * mContentHeight / mContentWidth;
+                    scaleY = destH / viewHeight;
+                    pivotPointX = 0;
+                    pivotPointY = (viewHeight - destH) / 2f;
+                }
+                pivotPointX = viewWidth / 2;
+                pivotPointY = viewHeight / 2;
+                break;
+            }
             case FILL:
                 if (viewWidth > viewHeight) {   // device in landscape
                     scaleX = (viewHeight * contentWidth) / (viewWidth * contentHeight);
@@ -106,11 +135,10 @@ public abstract class ScalableTextureView extends TextureView{
                 break;
         }
 
-        // Calculate pivot points, in our case crop from center
-        float pivotPointX;
-        float pivotPointY;
-
         switch (mScaleType) {
+            case FIT_CENTER: {
+                break;
+            }
             case TOP:
                 pivotPointX = 0;
                 pivotPointY = 0;
@@ -212,6 +240,7 @@ public abstract class ScalableTextureView extends TextureView{
 
     /**
      * Use it to animate TextureView content x position
+     *
      * @param x
      */
     public final void setContentX(float x) {
@@ -221,6 +250,7 @@ public abstract class ScalableTextureView extends TextureView{
 
     /**
      * Use it to animate TextureView content x position
+     *
      * @param y
      */
     public final void setContentY(float y) {

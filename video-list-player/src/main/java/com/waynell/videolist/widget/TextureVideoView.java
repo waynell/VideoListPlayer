@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -215,21 +216,7 @@ public class TextureVideoView extends ScalableTextureView
                 }
             }
 
-        } catch (IOException ex) {
-            if(SHOW_LOGS) Log.w(TAG, "Unable to open content: " + mUri, ex);
-            mCurrentState = STATE_ERROR;
-            mTargetState = STATE_ERROR;
-            if (mMediaPlayerCallback != null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mMediaPlayerCallback != null) {
-                            mMediaPlayerCallback.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
-                        }
-                    }
-                });
-            }
-        } catch (IllegalArgumentException ex) {
+        } catch (IOException | IllegalArgumentException ex) {
             if(SHOW_LOGS) Log.w(TAG, "Unable to open content: " + mUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
@@ -257,7 +244,9 @@ public class TextureVideoView extends ScalableTextureView
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
+        if (SHOW_LOGS) {
+            Log.i(TAG, "onSurfaceTextureSizeChanged: (" + width + ", " + height + ")");
+        }
     }
 
     @Override
@@ -395,10 +384,26 @@ public class TextureVideoView extends ScalableTextureView
             return;
         }
 
+        if (SHOW_LOGS) {
+            Log.i(TAG, "onPrepared: video size (" + mp.getVideoWidth() + ", " + mp.getVideoHeight() + ")");
+        }
+
         mCurrentState = STATE_PREPARED;
 
         if (isInPlaybackState()) {
             mMediaPlayer.start();
+
+            setContentWidth(mp.getVideoWidth());
+            setContentHeight(mp.getVideoHeight());
+
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    updateTextureViewSize();
+                }
+            });
+
+
             mCurrentState = STATE_PLAYING;
             mTargetState = STATE_PLAYING;
         }
