@@ -141,12 +141,14 @@ public class TextureVideoView extends ScalableTextureView
     }
 
     private void init() {
-        mContext = getContext();
-        mCurrentState = STATE_IDLE;
-        mTargetState  = STATE_IDLE;
-        mHandler = new Handler();
-        mVideoHandler = new Handler(sThread.getLooper(), this);
-        setSurfaceTextureListener(this);
+        if (!isInEditMode()) {
+            mContext = getContext();
+            mCurrentState = STATE_IDLE;
+            mTargetState = STATE_IDLE;
+            mHandler = new Handler();
+            mVideoHandler = new Handler(sThread.getLooper(), this);
+            setSurfaceTextureListener(this);
+        }
     }
 
 
@@ -461,5 +463,20 @@ public class TextureVideoView extends ScalableTextureView
             });
         }
         return true;
+    }
+
+    public long getVideoCurrentPosition() {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            return mMediaPlayer.getCurrentPosition();
+        }
+        return 0;
+
+    }
+
+    public long getVideoDuration() {
+        if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
+            return mMediaPlayer.getDuration();
+        }
+        return 0;
     }
 }
