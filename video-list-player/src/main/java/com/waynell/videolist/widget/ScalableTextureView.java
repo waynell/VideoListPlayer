@@ -90,25 +90,15 @@ public abstract class ScalableTextureView extends TextureView {
         float scaleX = 1.0f;
         float scaleY = 1.0f;
 
-        // Calculate pivot points, in our case crop from center
-        float pivotPointX = 0;
-        float pivotPointY = 0;
-
         switch (mScaleType) {
             case FIT_CENTER: {
                 if (viewWidth * mContentHeight > viewHeight * mContentWidth) {
                     float destW = viewHeight * mContentWidth / mContentHeight;
                     scaleX = destW / viewWidth;
-                    pivotPointX = (viewWidth - destW) / 2f;
-                    pivotPointY = 0;
                 } else {
                     float destH = viewWidth * mContentHeight / mContentWidth;
                     scaleY = destH / viewHeight;
-                    pivotPointX = 0;
-                    pivotPointY = (viewHeight - destH) / 2f;
                 }
-                pivotPointX = viewWidth / 2;
-                pivotPointY = viewHeight / 2;
                 break;
             }
             case FILL:
@@ -135,10 +125,11 @@ public abstract class ScalableTextureView extends TextureView {
                 break;
         }
 
+        // Calculate pivot points, in our case crop from center
+        float pivotPointX;
+        float pivotPointY;
+
         switch (mScaleType) {
-            case FIT_CENTER: {
-                break;
-            }
             case TOP:
                 pivotPointX = 0;
                 pivotPointY = 0;
@@ -147,6 +138,7 @@ public abstract class ScalableTextureView extends TextureView {
                 pivotPointX = viewWidth;
                 pivotPointY = viewHeight;
                 break;
+            case FIT_CENTER:
             case CENTER_CROP:
                 pivotPointX = viewWidth / 2;
                 pivotPointY = viewHeight / 2;
@@ -161,6 +153,7 @@ public abstract class ScalableTextureView extends TextureView {
 
         float fitCoef = 1;
         switch (mScaleType) {
+            case FIT_CENTER:
             case FILL:
                 break;
             case BOTTOM:
