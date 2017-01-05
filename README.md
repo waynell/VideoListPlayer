@@ -11,30 +11,31 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 #Changelogs
 
 **v.14**
-    1.支持更多类型的scaleType，详见 [Android-ScalableVideoView](https://github.com/yqritc/Android-ScalableVideoView)
-    2.加入 `getCurrentPosition()` 和 `getDuration()` 接口
+
+1. 支持更多类型的scaleType，详见 [Android-ScalableVideoView](https://github.com/yqritc/Android-ScalableVideoView)
+2. 加入 `getCurrentPosition()` 和 `getDuration()` 接口
 
 **v1.3**
 
-	fix在多类型列表元素中出现视频无法正常播放的bug
+1. fix在多类型列表元素中出现视频无法正常播放的bug
 
 **Demo 更新**
 	
-	1. 增加在ListView中播放视频的示例
-	2. ListView和RecyclerView中支持多类型view type展示
+1. 增加在ListView中播放视频的示例
+2. ListView和RecyclerView中支持多类型view type展示
 
 
 **v1.2**
 	
-	1. fix NPE bugs
+1. fix NPE bugs
 
 **v1.1**
 
-	1. 自动播放/停止功能性能优化
+1. 自动播放/停止功能性能优化
 
-	2. 视频播放加入声音开关控制，默认播放视频关闭声音，点击视频开启声音
+2. 视频播放加入声音开关控制，默认播放视频关闭声音，点击视频开启声音
 
-	3. fix在4.1.1以下无法播放视频的bug
+3. fix在4.1.1以下无法播放视频的bug
 
 
 #基本用法
@@ -45,7 +46,7 @@ VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并�
 	}
 	
 	dependencies {
-	        compile 'com.github.waynell:VideoListPlayer:1.3'
+	        compile 'com.github.waynell:VideoListPlayer:1.4'
 	}
 
 在xml布局中加入以下代码
