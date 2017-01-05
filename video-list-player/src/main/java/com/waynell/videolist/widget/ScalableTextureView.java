@@ -5,12 +5,17 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.TextureView;
+
+import com.waynell.videolist.BuildConfig;
 
 /**
  * This extension of {@link TextureView} is created to isolate scaling of this view.
  */
-public abstract class ScalableTextureView extends TextureView{
+public abstract class ScalableTextureView extends TextureView {
+
+    private static final String TAG = "TextureVideoView";
 
     private Integer mContentWidth;
     private Integer mContentHeight;
@@ -30,10 +35,10 @@ public abstract class ScalableTextureView extends TextureView{
 
     private final Matrix mTransformMatrix = new Matrix();
 
-    private ScaleType mScaleType;
+    private ScaleType mScaleType = ScaleType.FIT_CENTER;
 
     public enum ScaleType {
-        CENTER_CROP, TOP, BOTTOM, FILL
+        CENTER_CROP, TOP, BOTTOM, FILL, FIT_CENTER
     }
 
     public ScalableTextureView(Context context) {
@@ -71,6 +76,10 @@ public abstract class ScalableTextureView extends TextureView{
             throw new RuntimeException("null content size");
         }
 
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "ScalableTextureView content size: (" + mContentWidth + ", " + mContentWidth + ")");
+        }
+
         float viewWidth = getMeasuredWidth();
         float viewHeight = getMeasuredHeight();
 
@@ -82,6 +91,16 @@ public abstract class ScalableTextureView extends TextureView{
         float scaleY = 1.0f;
 
         switch (mScaleType) {
+            case FIT_CENTER: {
+                if (viewWidth * mContentHeight > viewHeight * mContentWidth) {
+                    float destW = viewHeight * mContentWidth / mContentHeight;
+                    scaleX = destW / viewWidth;
+                } else {
+                    float destH = viewWidth * mContentHeight / mContentWidth;
+                    scaleY = destH / viewHeight;
+                }
+                break;
+            }
             case FILL:
                 if (viewWidth > viewHeight) {   // device in landscape
                     scaleX = (viewHeight * contentWidth) / (viewWidth * contentHeight);
@@ -119,6 +138,7 @@ public abstract class ScalableTextureView extends TextureView{
                 pivotPointX = viewWidth;
                 pivotPointY = viewHeight;
                 break;
+            case FIT_CENTER:
             case CENTER_CROP:
                 pivotPointX = viewWidth / 2;
                 pivotPointY = viewHeight / 2;
@@ -133,6 +153,7 @@ public abstract class ScalableTextureView extends TextureView{
 
         float fitCoef = 1;
         switch (mScaleType) {
+            case FIT_CENTER:
             case FILL:
                 break;
             case BOTTOM:
@@ -212,6 +233,7 @@ public abstract class ScalableTextureView extends TextureView{
 
     /**
      * Use it to animate TextureView content x position
+     *
      * @param x
      */
     public final void setContentX(float x) {
@@ -221,6 +243,7 @@ public abstract class ScalableTextureView extends TextureView{
 
     /**
      * Use it to animate TextureView content x position
+     *
      * @param y
      */
     public final void setContentY(float y) {
