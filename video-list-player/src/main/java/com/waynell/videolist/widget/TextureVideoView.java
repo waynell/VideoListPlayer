@@ -3,6 +3,8 @@ package com.waynell.videolist.widget;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaExtractor;
@@ -12,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -19,6 +22,7 @@ import android.view.Surface;
 import android.view.TextureView;
 
 import com.waynell.videolist.BuildConfig;
+import com.waynell.videolist.R;
 
 import java.io.IOException;
 
@@ -29,7 +33,7 @@ import java.io.IOException;
  * @author Wayne
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class TextureVideoView extends ScalableTextureView
+public class TextureVideoView extends TextureView
         implements TextureView.SurfaceTextureListener,
         Handler.Callback,
         MediaPlayer.OnPreparedListener,
@@ -70,6 +74,8 @@ public class TextureVideoView extends ScalableTextureView
     private boolean mSoundMute;
     private boolean mHasAudio;
 
+    private ScaleType mScaleType = ScaleType.NONE;
+
     private static final HandlerThread sThread = new HandlerThread("VideoPlayThread");
     static {
         sThread.start();
@@ -86,17 +92,27 @@ public class TextureVideoView extends ScalableTextureView
     }
 
     public TextureVideoView(Context context) {
-        super(context);
-        init();
+        this(context, null);
     }
 
     public TextureVideoView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init();
+        this(context, attrs, 0);
     }
 
     public TextureVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        if (attrs == null) {
+            return;
+        }
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.scaleStyle, 0, 0);
+        if (a == null) {
+            return;
+        }
+
+        int scaleType = a.getInt(R.styleable.scaleStyle_scaleType, ScaleType.NONE.ordinal());
+        a.recycle();
+        mScaleType = ScaleType.values()[scaleType];
         init();
     }
 
@@ -104,6 +120,70 @@ public class TextureVideoView extends ScalableTextureView
         mMediaPlayerCallback = mediaPlayerCallback;
         if (mediaPlayerCallback == null) {
             mHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    public int getCurrentPosition() {
+        if (isInPlaybackState()) {
+            return mMediaPlayer.getCurrentPosition();
+        }
+        return 0;
+    }
+
+    public int getDuration() {
+        if (isInPlaybackState()) {
+            return mMediaPlayer.getDuration();
+        }
+
+        return -1;
+    }
+
+    public int getVideoHeight() {
+        if (mMediaPlayer != null) {
+            return mMediaPlayer.getVideoHeight();
+        }
+        return 0;
+    }
+
+    public int getVideoWidth() {
+        if (mMediaPlayer != null) {
+            return mMediaPlayer.getVideoWidth();
+        }
+        return 0;
+    }
+
+    public void setScaleType(ScaleType scaleType) {
+        mScaleType = scaleType;
+        scaleVideoSize(getVideoWidth(), getVideoHeight());
+    }
+
+    public ScaleType getScaleType() {
+        return mScaleType;
+    }
+
+    private void scaleVideoSize(int videoWidth, int videoHeight) {
+        if (videoWidth == 0 || videoHeight == 0) {
+            return;
+        }
+
+        Size viewSize = new Size(getWidth(), getHeight());
+        Size videoSize = new Size(videoWidth, videoHeight);
+        ScaleManager scaleManager = new ScaleManager(viewSize, videoSize);
+        final Matrix matrix = scaleManager.getScaleMatrix(mScaleType);
+        if (matrix == null) {
+            return;
+        }
+
+        if(Looper.myLooper() == Looper.getMainLooper()) {
+            setTransform(matrix);
+        }
+        else {
+            mHandler.postAtFrontOfQueue(new Runnable() {
+                @Override
+                public void run() {
+                    setTransform(matrix);
+                }
+            });
         }
     }
 
@@ -140,12 +220,14 @@ public class TextureVideoView extends ScalableTextureView
     }
 
     private void init() {
-        mContext = getContext();
-        mCurrentState = STATE_IDLE;
-        mTargetState  = STATE_IDLE;
-        mHandler = new Handler();
-        mVideoHandler = new Handler(sThread.getLooper(), this);
-        setSurfaceTextureListener(this);
+        if(!isInEditMode()) {
+            mContext = getContext();
+            mCurrentState = STATE_IDLE;
+            mTargetState = STATE_IDLE;
+            mHandler = new Handler();
+            mVideoHandler = new Handler(sThread.getLooper(), this);
+            setSurfaceTextureListener(this);
+        }
     }
 
 
@@ -215,21 +297,7 @@ public class TextureVideoView extends ScalableTextureView
                 }
             }
 
-        } catch (IOException ex) {
-            if(SHOW_LOGS) Log.w(TAG, "Unable to open content: " + mUri, ex);
-            mCurrentState = STATE_ERROR;
-            mTargetState = STATE_ERROR;
-            if (mMediaPlayerCallback != null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mMediaPlayerCallback != null) {
-                            mMediaPlayerCallback.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
-                        }
-                    }
-                });
-            }
-        } catch (IllegalArgumentException ex) {
+        } catch (IOException | IllegalArgumentException ex) {
             if(SHOW_LOGS) Log.w(TAG, "Unable to open content: " + mUri, ex);
             mCurrentState = STATE_ERROR;
             mTargetState = STATE_ERROR;
@@ -417,6 +485,7 @@ public class TextureVideoView extends ScalableTextureView
 
     @Override
     public void onVideoSizeChanged(final MediaPlayer mp, final int width, final int height) {
+        scaleVideoSize(width, height);
         if (mMediaPlayerCallback != null) {
             mHandler.post(new Runnable() {
                 @Override

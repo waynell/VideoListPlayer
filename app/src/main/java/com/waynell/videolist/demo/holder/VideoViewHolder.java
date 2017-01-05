@@ -82,6 +82,8 @@ public class VideoViewHolder extends BaseViewHolder<VideoItem>
             videoView.mute();
             Toast.makeText(itemView.getContext(), "turn off video sound", Toast.LENGTH_SHORT).show();
         }
+
+        Toast.makeText(itemView.getContext(), "durration: " + videoView.getDuration() + " pos: " + videoView.getCurrentPosition(), Toast.LENGTH_LONG).show();
     }
 
     private void reset() {
