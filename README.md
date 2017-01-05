@@ -1,3 +1,5 @@
+[![Build Status](https://semaphoreapp.com/api/v1/projects/d4cca506-99be-44d2-b19e-176f36ec8cf1/128505/shields_badge.svg)](https://github.com/waynell/VideoListPlayer) [![](https://jitpack.io/v/waynell/VideoListPlayer.svg)](https://jitpack.io/#waynell/VideoListPlayer)
+
 # VideoListPlayer
 VideoListPlayer实现了在列表控件（ListView, RecyclerView）中加载并播放视频，并支持滑动时自动播放/暂停的功能
 
